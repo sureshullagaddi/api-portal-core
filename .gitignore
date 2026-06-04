@@ -1,0 +1,7 @@
+infrastructure/lambda.zip
+infrastructure/.terraform/
+infrastructure/.terraform.lock.hcl
+infrastructure/tfplan
+lambda/src/node_modules/
+.DS_Store
+

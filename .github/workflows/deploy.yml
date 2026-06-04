@@ -1,0 +1,98 @@
+name: "Deploy Core Infrastructure (Cognito · Lambda · Secrets)"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infrastructure/**'
+      - 'lambda/src/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: dev
+        type: choice
+        options: [dev, sit, stage, prod]
+
+env:
+  AWS_REGION:   eu-north-1
+  PROJECT_NAME: api-portal
+  ENVIRONMENT:  ${{ github.event.inputs.environment || 'dev' }}
+  TF_VERSION:   '~1.7'
+
+jobs:
+  deploy:
+    name: "[${{ github.event.inputs.environment || 'dev' }}] Core — Cognito · Lambda · Secrets"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write   # Required for OIDC authentication
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: api-portal-core-${{ env.ENVIRONMENT }}
+          aws-region:        ${{ env.AWS_REGION }}
+
+      - name: Package Lambda zip (index + authorizer + internal-caller)
+        run: |
+          cd lambda/src
+          npm install --omit=dev --no-audit --no-fund
+          zip -r ../../infrastructure/lambda.zip . \
+            --exclude "*.zip" --exclude ".DS_Store" --exclude "*.test.js"
+          echo "✅ lambda.zip: $(du -sh ../../infrastructure/lambda.zip | cut -f1)"
+
+      - name: Setup Terraform ${{ env.TF_VERSION }}
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        working-directory: infrastructure
+        run: |
+          terraform init \
+            -backend-config="key=${{ env.PROJECT_NAME }}/core/${{ env.ENVIRONMENT }}/terraform.tfstate"
+
+      - name: Terraform Validate
+        working-directory: infrastructure
+        run: terraform validate
+
+      - name: Terraform Plan
+        working-directory: infrastructure
+        run: |
+          terraform plan \
+            -var-file="envs/${{ env.ENVIRONMENT }}.tfvars" \
+            -var="authorizer_api_key=${{ secrets.AUTHORIZER_API_KEY }}" \
+            -var="alert_email=${{ secrets.ALERT_EMAIL }}" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        working-directory: infrastructure
+        run: terraform apply -auto-approve tfplan
+
+      - name: Show outputs
+        working-directory: infrastructure
+        run: |
+          echo ""
+          echo "══════════════════════════════════════════════"
+          echo "  ✅ CORE DEPLOYED  |  env=${{ env.ENVIRONMENT }}"
+          echo "══════════════════════════════════════════════"
+          terraform output cognito_user_pool_id
+          terraform output cognito_client_id
+          terraform output lambda_function_name
+          terraform output authorizer_function_name
+          echo "══════════════════════════════════════════════"
+          echo "  ▶ Next: trigger api-portal-backend deploy"
+          echo "══════════════════════════════════════════════"
