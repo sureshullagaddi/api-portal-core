@@ -19,22 +19,3 @@ variable "environment" {
     error_message = "environment must be one of: dev, sit, stage, prod."
   }
 }
-
-variable "log_retention_days" {
-  description = "CloudWatch log retention in days"
-  type        = number
-  default     = 14
-}
-
-variable "alert_email" {
-  description = "Email for CloudWatch alarm notifications. Leave empty to skip SNS subscription."
-  type        = string
-  default     = ""
-}
-
-variable "authorizer_api_key" {
-  description = "Default X-Api-Key for the custom authorizer Lambda (stored in Secrets Manager)"
-  type        = string
-  default     = "my-secret-key-123"
-  sensitive   = true
-}

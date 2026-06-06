@@ -1,15 +1,13 @@
-output "cognito_user_pool_id"     { value = aws_cognito_user_pool.this.id }
-output "cognito_client_id"        { value = aws_cognito_user_pool_client.this.id }
-output "lambda_function_name"     { value = aws_lambda_function.backend.function_name }
-output "lambda_arn"               { value = aws_lambda_function.backend.arn }
-output "authorizer_function_name" { value = aws_lambda_function.authorizer.function_name }
-output "authorizer_arn"           { value = aws_lambda_function.authorizer.arn }
-output "sns_topic_arn"            { value = aws_sns_topic.alarms.arn }
-output "account_id"               { value = data.aws_caller_identity.current.account_id }
+output "cognito_user_pool_id" { value = aws_cognito_user_pool.this.id }
+output "cognito_client_id"    { value = aws_cognito_user_pool_client.this.id }
+output "account_id"           { value = data.aws_caller_identity.current.account_id }
 
-output "partner_api_key_command" {
-  description = "Retrieve the partner X-Api-Key for Custom Key auth testing"
-  value       = "aws secretsmanager get-secret-value --secret-id ${aws_secretsmanager_secret.partner_api_key.name} --region ${var.aws_region} --query SecretString --output text"
+output "ssm_paths" {
+  description = "SSM parameter paths written — read by api-portal-backend and api-portal-frontend"
+  value = {
+    cognito_pool_id  = aws_ssm_parameter.cognito_pool_id.name
+    cognito_client_id = aws_ssm_parameter.cognito_client_id.name
+  }
 }
 
 output "create_test_user_commands" {
