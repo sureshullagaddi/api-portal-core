@@ -119,18 +119,17 @@ fi
 echo ""
 echo "▶ [4/4] IAM deploy roles (one per repo)"
 
-# Repos that need a deploy role
-declare -A REPOS=(
-  ["api-portal-core"]="api-portal-core"
-  ["api-portal-backend"]="api-portal-backend"
-  ["api-portal-frontend"]="api-portal-frontend"
+# Repos that need a deploy role (plain array — works on macOS Bash 3.x)
+REPOS=(
+  "api-portal-core"
+  "api-portal-backend"
+  "api-portal-frontend"
 )
 
 ROLE_ARNS=()
 
-for ROLE_SUFFIX in "${!REPOS[@]}"; do
-  REPO_NAME="${REPOS[$ROLE_SUFFIX]}"
-  ROLE_NAME="${ROLE_SUFFIX}-deploy-role"
+for REPO_NAME in "${REPOS[@]}"; do
+  ROLE_NAME="${REPO_NAME}-deploy-role"
 
   TRUST_POLICY=$(cat <<EOF
 {
@@ -181,7 +180,7 @@ EOF
   fi
 
   ROLE_ARN="arn:aws:iam::${ACCOUNT_ID}:role/${ROLE_NAME}"
-  ROLE_ARNS+=("$ROLE_SUFFIX → $ROLE_ARN")
+  ROLE_ARNS+=("$REPO_NAME → $ROLE_ARN")
 done
 
 # ── Summary ───────────────────────────────────────────────────────────────────
