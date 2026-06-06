@@ -1,0 +1,249 @@
+suresh@M-JWCMHJ7Y06 scripts % ./bootstrap-state.sh
+
+════════════════════════════════════════════════════════════════
+  API Portal — Bootstrap Terraform State + OIDC Auth
+════════════════════════════════════════════════════════════════
+  Account : 397979615352
+  Region  : eu-north-1
+  Org     : sureshullagaddi
+  Bucket  : tf-state-397979615352
+  DynamoDB: api-portal-terraform-locks
+════════════════════════════════════════════════════════════════
+
+▶ [1/4] S3 state bucket: tf-state-397979615352
+{
+    "BucketArn": "arn:aws:s3:::tf-state-397979615352",
+    "BucketRegion": "eu-north-1",
+    "AccessPointAlias": false
+}
+    ✓ Already exists — skipping creation
+
+▶ [2/4] DynamoDB lock table: api-portal-terraform-locks
+{
+    "TableDescription": {
+        "AttributeDefinitions": [
+            {
+                "AttributeName": "LockID",
+                "AttributeType": "S"
+            }
+        ],
+        "TableName": "api-portal-terraform-locks",
+        "KeySchema": [
+            {
+                "AttributeName": "LockID",
+                "KeyType": "HASH"
+            }
+        ],
+        "TableStatus": "CREATING",
+        "CreationDateTime": "2026-06-06T10:55:27.929000+02:00",
+        "ProvisionedThroughput": {
+            "NumberOfDecreasesToday": 0,
+            "ReadCapacityUnits": 0,
+            "WriteCapacityUnits": 0
+        },
+        "TableSizeBytes": 0,
+        "ItemCount": 0,
+        "TableArn": "arn:aws:dynamodb:eu-north-1:397979615352:table/api-portal-terraform-locks",
+        "TableId": "cb46d81c-02ec-447a-82db-090cafd72ed2",
+        "BillingModeSummary": {
+            "BillingMode": "PAY_PER_REQUEST"
+        },
+        "DeletionProtectionEnabled": false
+    }
+}
+    ✓ DynamoDB table created
+
+▶ [3/4] GitHub Actions OIDC provider
+    ✓ Already exists — skipping creation
+
+▶ [4/4] IAM deploy roles (one per repo)
+./bootstrap-state.sh: line 123: api: unbound variable
+suresh@M-JWCMHJ7Y06 scripts % ./bootstrap-state.sh
+
+════════════════════════════════════════════════════════════════
+  API Portal — Bootstrap Terraform State + OIDC Auth
+════════════════════════════════════════════════════════════════
+  Account : 397979615352
+  Region  : eu-north-1
+  Org     : sureshullagaddi
+  Bucket  : tf-state-397979615352
+  DynamoDB: api-portal-terraform-locks
+════════════════════════════════════════════════════════════════
+
+▶ [1/4] S3 state bucket: tf-state-397979615352
+{
+    "BucketArn": "arn:aws:s3:::tf-state-397979615352",
+    "BucketRegion": "eu-north-1",
+    "AccessPointAlias": false
+}
+    ✓ Already exists — skipping creation
+
+▶ [2/4] DynamoDB lock table: api-portal-terraform-locks
+    ✓ Already exists — skipping creation
+
+▶ [3/4] GitHub Actions OIDC provider
+    ✓ Already exists — skipping creation
+
+▶ [4/4] IAM deploy roles (one per repo)
+{
+    "Role": {
+        "Path": "/",
+        "RoleName": "api-portal-core-deploy-role",
+        "RoleId": "AROAVZKLPAB4F7J46COTL",
+        "Arn": "arn:aws:iam::397979615352:role/api-portal-core-deploy-role",
+        "CreateDate": "2026-06-06T09:53:26+00:00",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Federated": "arn:aws:iam::397979615352:oidc-provider/token.actions.githubusercontent.com"
+                    },
+                    "Action": "sts:AssumeRoleWithWebIdentity",
+                    "Condition": {
+                        "StringEquals": {
+                            "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                        },
+                        "StringLike": {
+                            "token.actions.githubusercontent.com:sub": [
+                                "repo:sureshullagaddi/api-portal-core:ref:refs/heads/main",
+                                "repo:sureshullagaddi/api-portal-core:ref:refs/heads/*",
+                                "repo:sureshullagaddi/api-portal-core:pull_request"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "Tags": [
+            {
+                "Key": "Project",
+                "Value": "api-portal"
+            },
+            {
+                "Key": "ManagedBy",
+                "Value": "bootstrap-script"
+            }
+        ]
+    }
+}
+    ✓ Role api-portal-core-deploy-role created
+      ⚠ Attached AdministratorAccess — scope down for production
+{
+    "Role": {
+        "Path": "/",
+        "RoleName": "api-portal-backend-deploy-role",
+        "RoleId": "AROAVZKLPAB4EMCHSLBAB",
+        "Arn": "arn:aws:iam::397979615352:role/api-portal-backend-deploy-role",
+        "CreateDate": "2026-06-06T09:53:28+00:00",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Federated": "arn:aws:iam::397979615352:oidc-provider/token.actions.githubusercontent.com"
+                    },
+                    "Action": "sts:AssumeRoleWithWebIdentity",
+                    "Condition": {
+                        "StringEquals": {
+                            "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                        },
+                        "StringLike": {
+                            "token.actions.githubusercontent.com:sub": [
+                                "repo:sureshullagaddi/api-portal-backend:ref:refs/heads/main",
+                                "repo:sureshullagaddi/api-portal-backend:ref:refs/heads/*",
+                                "repo:sureshullagaddi/api-portal-backend:pull_request"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "Tags": [
+            {
+                "Key": "Project",
+                "Value": "api-portal"
+            },
+            {
+                "Key": "ManagedBy",
+                "Value": "bootstrap-script"
+            }
+        ]
+    }
+}
+    ✓ Role api-portal-backend-deploy-role created
+      ⚠ Attached AdministratorAccess — scope down for production
+{
+    "Role": {
+        "Path": "/",
+        "RoleName": "api-portal-frontend-deploy-role",
+        "RoleId": "AROAVZKLPAB4A4UP73YAK",
+        "Arn": "arn:aws:iam::397979615352:role/api-portal-frontend-deploy-role",
+        "CreateDate": "2026-06-06T09:53:30+00:00",
+        "AssumeRolePolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {
+                        "Federated": "arn:aws:iam::397979615352:oidc-provider/token.actions.githubusercontent.com"
+                    },
+                    "Action": "sts:AssumeRoleWithWebIdentity",
+                    "Condition": {
+                        "StringEquals": {
+                            "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                        },
+                        "StringLike": {
+                            "token.actions.githubusercontent.com:sub": [
+                                "repo:sureshullagaddi/api-portal-frontend:ref:refs/heads/main",
+                                "repo:sureshullagaddi/api-portal-frontend:ref:refs/heads/*",
+                                "repo:sureshullagaddi/api-portal-frontend:pull_request"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        "Tags": [
+            {
+                "Key": "Project",
+                "Value": "api-portal"
+            },
+            {
+                "Key": "ManagedBy",
+                "Value": "bootstrap-script"
+            }
+        ]
+    }
+}
+    ✓ Role api-portal-frontend-deploy-role created
+      ⚠ Attached AdministratorAccess — scope down for production
+
+════════════════════════════════════════════════════════════════
+  ✅ Bootstrap complete!
+════════════════════════════════════════════════════════════════
+
+  Shared state bucket : tf-state-397979615352
+  Shared lock table   : api-portal-terraform-locks
+
+  State key structure:
+    api-portal/core/{env}/terraform.tfstate      ← api-portal-core
+    api-portal/backend/{env}/terraform.tfstate   ← api-portal-backend
+    api-portal/frontend/{env}/terraform.tfstate  ← api-portal-frontend
+
+  Add AWS_ROLE_ARN secret to each GitHub repo:
+
+    api-portal-core → arn:aws:iam::397979615352:role/api-portal-core-deploy-role
+    api-portal-backend → arn:aws:iam::397979615352:role/api-portal-backend-deploy-role
+    api-portal-frontend → arn:aws:iam::397979615352:role/api-portal-frontend-deploy-role
+
+  Also add to each repo (if using alert emails):
+    ALERT_EMAIL       = your-alerts@example.com
+    AUTHORIZER_API_KEY = <custom-api-key>   (core repo only)
+
+  Deploy order:
+    1. Push to api-portal-core    (creates Cognito + Lambdas → SSM)
+    2. Push to api-portal-backend (reads SSM → creates DynamoDB + API GW → SSM)
+    3. Push to api-portal-frontend (reads SSM → builds React → S3)

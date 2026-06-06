@@ -5,11 +5,11 @@ terraform {
     archive = { source = "hashicorp/archive", version = "~> 2.0" }
   }
   backend "s3" {
-    bucket         = "api-portal-terraform-state"
+    bucket         = "tf-state-397979615352"
     region         = "eu-north-1"
     dynamodb_table = "api-portal-terraform-locks"
     encrypt        = true
-    # key injected per env: -backend-config="key=core/{env}/terraform.tfstate"
+    # key injected per env: -backend-config="key=api-portal/core/{env}/terraform.tfstate"
   }
 }
 
