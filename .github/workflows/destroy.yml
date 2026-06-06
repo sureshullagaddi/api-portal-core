@@ -1,0 +1,75 @@
+name: "Destroy Core Infrastructure (Cognito · SSM)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment to destroy'
+        required: true
+        default: dev
+        type: choice
+        options: [dev, sit, stage, prod]
+      confirm:
+        description: 'Type "destroy" to confirm'
+        required: true
+        default: ''
+
+env:
+  AWS_REGION:   eu-north-1
+  PROJECT_NAME: api-portal
+  ENVIRONMENT:  ${{ github.event.inputs.environment }}
+  TF_VERSION:   '~1.7'
+
+jobs:
+  destroy:
+    name: "[${{ github.event.inputs.environment }}] DESTROY Core — Cognito · SSM"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Abort if confirmation missing
+        if: ${{ github.event.inputs.confirm != 'destroy' }}
+        run: |
+          echo "❌ You must type 'destroy' in the confirm field to proceed."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: api-portal-core-destroy-${{ env.ENVIRONMENT }}
+          aws-region:        ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform ${{ env.TF_VERSION }}
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        working-directory: infrastructure
+        run: |
+          terraform init \
+            -backend-config="key=${{ env.PROJECT_NAME }}/core/${{ env.ENVIRONMENT }}/terraform.tfstate"
+
+      - name: Terraform Destroy
+        working-directory: infrastructure
+        run: |
+          terraform destroy \
+            -var-file="envs/${{ env.ENVIRONMENT }}.tfvars" \
+            -auto-approve
+
+      - name: Summary
+        run: |
+          echo ""
+          echo "══════════════════════════════════════════════"
+          echo "  🗑️  CORE DESTROYED  |  env=${{ env.ENVIRONMENT }}"
+          echo "══════════════════════════════════════════════"
+          echo "  Cognito User Pool deleted"
+          echo "  SSM parameters deleted"
+          echo "══════════════════════════════════════════════"
+
